@@ -31,7 +31,8 @@ const Chat = () => {
             }
         };
         getChats();
-    }, [currentUser]);
+        console.log(chats);
+    }, [JSON.stringify(chats)]);
 
     useEffect(() => {
         if (currentUser) {
@@ -52,7 +53,7 @@ const Chat = () => {
         <div className="flex gap-10 justify-around">
             {/* Search bar */}
 
-            {/* <Users setChats={setChats} /> */}
+            <Users setChats={setChats} />
             {/* Left Convesation Panel */}
 
             <div className="flex ml-10 flex-col gap-5 min-w-[300px] shadow-lg max-w-fit p-4">
