@@ -13,12 +13,14 @@ if (require.main === module) {
       await Kilt.connect(process.env.WSS_ADDRESS);
 
       // Load user account. Uncomment the following line to use the mnemonic from the .env file.
-      // const accountMnemonic = process.env.{ACCOUNT MNEMONIC} as string;
+
+      // const accountMnemonic = process.env.USER1_ACCOUNT1_MNEMONIC OR process.env.USER2_ACCOUNT2_MNEMONIC;
       const { account } = generateAccount(accountMnemonic);
-      const { mnemonic } = await createFullDid(account);
+      const { mnemonic, didUri } = await createFullDid(account);
 
       console.log("\nsave following to .env to continue\n");
       console.error(`USER_DID_MNEMONIC="${mnemonic}"\n`);
+      console.error(`USER_DID_URI="${didUri}"\n`);
     } catch (e) {
       console.log("Error while creating attester DID");
       throw e;
