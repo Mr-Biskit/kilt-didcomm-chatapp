@@ -102,7 +102,7 @@ Once the both parties are loggedIn and webRTC peers are connected you can do thi
 
 ## This is the implementation that we tried to do using DIDComm spec
 
-[implementation]("https://github.com/Mr-Biskit/didComm-anonCrypt")
+[implementation](https://github.com/Mr-Biskit/didComm-anonCrypt)
 
 ## Encryption and Decryption
 
