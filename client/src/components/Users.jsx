@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import User from "./User";
 import { useUser } from "../contexts/UserContext";
 import axios from "axios";
@@ -9,48 +9,39 @@ const Users = ({ setChats }) => {
     const [search, setSearch] = useState("");
     const [notInChatUsers, setNotInChatUsers] = useState([]);
     const { currentUser } = useUser();
-    const filteredUsers = notInChatUsers.filter((user) =>
+    const filteredUsers = notInChatUsers?.filter((user) =>
         user.did.includes(search)
     );
-    const getAllUsers = async () => {
-        axios.get("http://localhost:8000/api/v1/user").then((res) => {
-            const filterCurrrUser = res.data.filter(
+
+    useEffect(() => {
+        (async () => {
+            const allusers = await axios.get(
+                "http://localhost:8000/api/v1/user"
+            );
+            const filteredUsers = allusers?.data?.filter(
                 (user) => user._id !== currentUser?._id
             );
-
-            setAllUsers(filterCurrrUser);
-        });
-    };
-
-    const getChats = async () => {
-        try {
-            const { data } = await userChats(currentUser?._id);
-            data?.map((chat) => {
-                _setUserChats(chat);
+            console.log("all users", filteredUsers);
+            const allChats = await userChats(currentUser?._id);
+            let members = [];
+            allChats?.data?.map((chat) => {
+                console.log("chat", chat);
+                members = [...members, ...chat.members];
             });
-        } catch (error) {
-            console.log(error);
-        }
-    };
-    useEffect(() => {
-        getAllUsers();
-        getChats();
+            console.log("members", members);
+            const _notInChat = filteredUsers?.filter(
+                (user) => !members?.includes(user._id)
+            );
+            setNotInChatUsers(_notInChat);
+            console.log("not in chat", _notInChat);
+        })();
     }, []);
-
-    useEffect(() => {
-        const notInChat = allUsers.filter(
-            (user) => !_userChats?.includes(user._id)
-        );
-        console.log(notInChat);
-        setNotInChatUsers(notInChat);
-    }, []);
-
     const handleSearch = (e) => {
         setSearch(e.target.value);
     };
     return (
         <div className="ml-10">
-            <div className="flex flex-col gap-2 shadow-lg max-w-fit mt-10">
+            <div className="flex flex-col gap-2 shadow-lg max-w-fit items-center ml-10 mt-10">
                 <input
                     type="text"
                     placeholder="Search Friend..."
@@ -61,11 +52,11 @@ const Users = ({ setChats }) => {
                     }}
                 />
                 <div>
-                    {filteredUsers.length ? (
+                    {filteredUsers?.length ? (
                         filteredUsers.map((user, index) => (
                             <div
+                                className="p-4 text-white"
                                 key={index}
-                                className="bg-gray-200 p-2 rounded-lg cursor-pointer space-y-3"
                                 onClick={() => {}}
                             >
                                 <User setChats={setChats} data={user} />

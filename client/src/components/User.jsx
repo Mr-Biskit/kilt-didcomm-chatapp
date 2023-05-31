@@ -20,14 +20,12 @@ const User = ({ data, setChats }) => {
         }
     };
     return (
-        <div className="">
-            <span
-                className="bg-gray-500 text-white py-1 px-3 rounded-lg cursor-pointer"
-                onClick={() => handleCreateChat(data._id, data.did)}
-            >
-                {formatDid(data?.did)}
-            </span>
-        </div>
+        <span
+            className="bg-indigo-500 min-w-max px-5 py-3 rounded-lg cursor-pointer"
+            onClick={() => handleCreateChat(data._id, data.did)}
+        >
+            {formatDid(data?.did)}
+        </span>
     );
 };
 export default User;
