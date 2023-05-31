@@ -28,8 +28,6 @@ export async function sendMessage(
         );
         // Generate a random nonce
         const nonce = nacl.randomBytes(nacl.box.nonceLength);
-        console.log("nonce encrypting", nonce);
-        // Encrypt the message and the signature using the nonce
 
         const sharedSecretUint8Array = deriveSharedSecret(
             senderPrivateKey,
@@ -41,7 +39,7 @@ export async function sendMessage(
         console.log("This is the encrypted message:", encrypted);
 
         console.log("Message sent successfully");
-        return { encrypted, nonce };
+        return { encrypted, nonce, signature };
     } catch (error) {
         console.error("Error sending message:", error);
         throw error;

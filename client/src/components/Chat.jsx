@@ -1,4 +1,4 @@
-import React, { cloneElement, useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useUser } from "../contexts/UserContext";
 import { userChats } from "../services/chat";
 import { useNavigate } from "react-router-dom";
@@ -24,13 +24,14 @@ const Chat = () => {
         const getChats = async () => {
             try {
                 const { data } = await userChats(currentUser?._id);
+                console.log(data);
                 setChats(data);
             } catch (error) {
                 console.log(error);
             }
         };
         getChats();
-    }, [chats]);
+    }, [currentUser]);
 
     useEffect(() => {
         if (currentUser) {
@@ -67,16 +68,6 @@ const Chat = () => {
                                 setCurrentChat(chat);
                             }}
                         >
-                            <Conversation data={chat} />
-
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
-                            <Conversation data={chat} />
                             <Conversation data={chat} />
                         </div>
                     ))}

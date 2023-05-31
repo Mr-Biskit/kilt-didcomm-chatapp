@@ -15,6 +15,7 @@ import { fetchMessages, getUserData } from "../helpers/api";
 import { getDidDoc } from "../lib/src/kilt/didResolver";
 import { useUser } from "../contexts/UserContext";
 import { receiveMessage, sendMessage } from "../lib/src/didComm";
+import { verifyMessageSignature } from "../lib/src/didComm/signing";
 
 const ChatBox = ({
     chat,
@@ -51,7 +52,6 @@ const ChatBox = ({
         socket.emit("send-user-to-call", { senderId, receiverId });
     };
     const connectPeer = useCallback((peerId) => {
-        console.log("peerid to connect: ", peerId);
         const conn = peer.connect(peerId);
         setConnection(conn);
         conn.on("open", () => {
@@ -82,14 +82,12 @@ const ChatBox = ({
     }, [chat?.members?.senderId, chat?._id]);
     useEffect(() => {
         if (chat !== null) {
-            console.log("make intial call");
             makeInitialCall();
         }
         socket.on("make-call", (peerId) => {
             connectPeer(peerId);
         });
         peer.on("connection", (conn) => {
-            console.log("connection made", receiverDidDoc);
             conn.on("data", async (data) => {
                 // setRecievedMessage(JSON.parse(data));
                 const _data = JSON.parse(data);
@@ -98,13 +96,11 @@ const ChatBox = ({
                 );
                 const { data: receiverData } = await getUser(receiverId);
                 const didDoc = await getDidDoc(receiverData.did);
-                const nonce = _data.nonce;
                 const receiverPrivateKey = user?.keyAgreementPrivateKey;
                 const senderPublicKey = didDoc?.keyAgreement[0].publicKey;
                 const encryptedMsg = _data.encrypted;
-                console.log("encryptedMsg: ", encryptedMsg);
-                console.log("senderPublicKey: ", senderPublicKey);
-                console.log("receiverPrivateKey: ", receiverPrivateKey);
+                const nonce = _data.nonce;
+                const signature = _data.signature;
 
                 const decryptedMessage = await receiveMessage(
                     encryptedMsg,
@@ -112,7 +108,16 @@ const ChatBox = ({
                     senderPublicKey,
                     nonce
                 );
-                console.log("decryptedMessage: ", decryptedMessage);
+
+                const verifySignature = await verifyMessageSignature(
+                    decryptedMessage,
+                    signature
+                );
+                if (verifySignature) {
+                    setRecievedMessage(decryptedMessage);
+                } else {
+                    console.log("signature not verified");
+                }
             });
         });
     }, [chat?.members?.senderId, chat?._id]);
@@ -135,15 +140,14 @@ const ChatBox = ({
             text: newMessage,
             chatId: chat._id,
         };
-        const { encrypted, nonce } = await sendMessage(
+        const { encrypted, nonce, signature } = await sendMessage(
             message,
             receiverPublicKey,
             senderPrivateKey,
             seed,
             senderDid
         );
-        console.log("encrypted: ", encrypted);
-        connection.send(JSON.stringify({ encrypted, nonce }));
+        connection.send(JSON.stringify({ encrypted, nonce, signature }));
 
         // send message to database
         try {
