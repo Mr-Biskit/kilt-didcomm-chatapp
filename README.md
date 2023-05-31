@@ -100,6 +100,8 @@ Once the both parties are loggedIn and webRTC peers are connected you can do thi
 -   Webrtc connection will happen if all things are done properly
 -   Enjoy realtime secure chatting with the peer.
 
+## This is the implementation that we tried to do using DIDComm spec [DIDComm Implementation]("https://github.com/Mr-Biskit/didComm-anonCrypt")
+
 ## Encryption and Decryption
 
 Our chat application relies on several essential processes, primarily encryption, decryption, and the derivation of shared secrets. Here's an overview:
