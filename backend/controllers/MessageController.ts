@@ -2,16 +2,8 @@ import { Request, Response } from "express";
 import MessageModel from "../models/MessageModel";
 
 export const addMessage = async (req: Request, res: Response) => {
-    const {
-        chatId,
-        senderId,
-        from,
-        to,
-        body,
-        created_time,
-        expired_time,
-        type,
-    } = req.body;
+    const { chatId, from, to, body, created_time, expired_time, type } =
+        req.body;
     const message = new MessageModel(req.body);
     try {
         const result = await message.save();

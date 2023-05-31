@@ -23,27 +23,24 @@ const ChatBox = ({
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [receiverDidDoc, setReceiverDidDoc] = useState({});
+    const [connectedUsersSocket, setConnectedUsersSocket] = useState(null);
+    const [receiverIdSocket, setReceiverIdSocket] = useState(null);
     const socket = useSocket();
     const _chat = useRef();
     const { currentUser: user } = useUser();
 
-    const container = useRef();
-
-    const Scroll = () => {
-        const { offsetHeight, scrollHeight, scrollTop } = container.current;
-        if (scrollHeight <= scrollTop + offsetHeight + 100) {
-            container.current?.scrollTo(0, scrollHeight);
-        }
-    };
-
-    useEffect(() => {
-        Scroll();
-    }, [messages]);
-
     const makeInitialCall = () => {
         const senderId = currentUser;
         const receiverId = chat?.members?.find((id) => id !== currentUser);
-        socket.emit("send-user-to-call", { senderId, receiverId });
+        const receiverIdFromSocket = connectedUsersSocket.find(
+            (user) => user.userId === receiverId
+        )?.userId;
+        if (receiverIdFromSocket) {
+            setReceiverIdSocket(receiverIdFromSocket);
+            socket.emit("send-user-to-call", { senderId, receiverId });
+        } else {
+            alert("Ask your partner to login");
+        }
     };
     const connectPeer = useCallback((peerId) => {
         const conn = peer.connect(peerId);
@@ -56,6 +53,9 @@ const ChatBox = ({
         if (chat !== null) {
             _chat.current = chat;
         }
+        socket.on("get-users", (users) => {
+            setConnectedUsersSocket(users);
+        });
     }, [chat]);
     useEffect(() => {
         if (chat !== null) {
@@ -69,13 +69,12 @@ const ChatBox = ({
                 setMessages(_messages);
                 const { data } = await getUser(receiverId);
                 const didDoc = await getDidDoc(data.did);
-                console.log(user);
                 setReceiverDidDoc(didDoc);
             })();
         }
     }, [chat?.members?.senderId, chat?._id]);
     useEffect(() => {
-        if (chat !== null) {
+        if (chat !== null && connectedUsersSocket) {
             makeInitialCall();
         }
         socket.on("make-call", (peerId) => {
@@ -115,7 +114,11 @@ const ChatBox = ({
                 }
             });
         });
-    }, [chat?.members?.senderId, chat?._id]);
+    }, [
+        chat?.members?.senderId,
+        chat?._id,
+        JSON.stringify(connectedUsersSocket),
+    ]);
     // Listen for connection
 
     useEffect(() => {
@@ -142,7 +145,6 @@ const ChatBox = ({
                 text: newMessage,
             },
 
-            senderId: currentUser,
             chatId: chat._id,
         };
         const { encrypted, nonce, signature } = await sendMessage(
@@ -165,11 +167,8 @@ const ChatBox = ({
         }
     };
     return (
-        <div
-            ref={container}
-            className="h-[700px] overflow-y-scroll rounded-md bg-gray-300 flex flex-col-reverse p-5 shadow-xl  "
-        >
-            {!chat ? (
+        <div className="h-[700px] overflow-y-scroll rounded-md bg-gray-300 flex flex-col-reverse p-5 shadow-xl  ">
+            {!chat || !receiverIdSocket ? (
                 <div className="h-screen w-full justify-self-center bg-gray-300 text-center text-5xl rounded-md shadow-md">
                     Select a chat
                 </div>
@@ -183,20 +182,20 @@ const ChatBox = ({
                             <div
                                 key={id}
                                 className={`${
-                                    message?.senderId === currentUser
+                                    message?.from === user.did
                                         ? "flex justify-end pr-5"
                                         : "flex justify-start"
                                 }`}
                             >
                                 <div>
                                     <span className="text-xs">
-                                        {message?.senderId === currentUser
+                                        {message?.from === user.did
                                             ? "You"
                                             : "Other"}
                                     </span>
                                     <div
                                         className={`${
-                                            message?.senderId === currentUser
+                                            message?.from === user.did
                                                 ? "bg-purple-500"
                                                 : "bg-gray-500"
                                         } text-white p-2 rounded-lg`}
