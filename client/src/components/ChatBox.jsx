@@ -1,11 +1,5 @@
-import React, {
-    useCallback,
-    useDeferredValue,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { nanoid } from "nanoid";
 import { getUser } from "../services/user";
 import { addMessage, getMessages } from "../services/message";
 import { useSocket } from "../contexts/SocketContext";
@@ -113,6 +107,7 @@ const ChatBox = ({
                     decryptedMessage,
                     signature
                 );
+                console.log("decryptedMessage", decryptedMessage);
                 if (verifySignature) {
                     setRecievedMessage(decryptedMessage);
                 } else {
@@ -135,9 +130,19 @@ const ChatBox = ({
         const senderPrivateKey = user?.keyAgreementPrivateKey;
         const seed = user?.mnemonic;
         const senderDid = user?.did;
+
         const message = {
+            id: nanoid(8),
+            type: "https://kilt.io/message",
+            from: senderDid,
+            to: [receiverDidDoc.Uri],
+            created_time: Math.floor(Date.now() / 1000),
+            expires_time: Math.floor(Date.now() / 1000) + 60,
+            body: {
+                text: newMessage,
+            },
+
             senderId: currentUser,
-            text: newMessage,
             chatId: chat._id,
         };
         const { encrypted, nonce, signature } = await sendMessage(
@@ -147,6 +152,7 @@ const ChatBox = ({
             seed,
             senderDid
         );
+        console.log(encrypted, nonce, signature);
         connection.send(JSON.stringify({ encrypted, nonce, signature }));
 
         // send message to database
@@ -195,7 +201,7 @@ const ChatBox = ({
                                                 : "bg-gray-500"
                                         } text-white p-2 rounded-lg`}
                                     >
-                                        {message?.text}
+                                        {message?.body?.text}
                                     </div>
                                 </div>
                             </div>

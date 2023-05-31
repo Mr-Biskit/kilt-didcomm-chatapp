@@ -36,7 +36,6 @@ export async function sendMessage(
         );
         const sharedSecret = Buffer.from(sharedSecretUint8Array); //why convert to buffer?
         const encrypted = encryptMessage({ ...message }, sharedSecret);
-        console.log("This is the encrypted message:", encrypted);
 
         console.log("Message sent successfully");
         return { encrypted, nonce, signature };
@@ -62,8 +61,6 @@ export async function receiveMessage(
         );
 
         const sharedSecret = Buffer.from(sharedSecretUint8Array);
-        console.log("This is the shared secret:", sharedSecret);
-        console.log("This is the encrypted message:", encrypted);
         const message = decryptMessage(encrypted, sharedSecret);
 
         // Verify the signature
