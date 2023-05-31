@@ -31,7 +31,6 @@ const Chat = () => {
             }
         };
         getChats();
-        console.log(chats);
     }, [JSON.stringify(chats)]);
 
     useEffect(() => {
