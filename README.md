@@ -19,6 +19,8 @@ Welcome to our Decentralized Identity (DID) Messaging Application! This chat app
 
 For safety and security, it is essential that a user's mnemonic is never shared with other parties. Therefore, for the purposes of this test scenario, we have provided scripts to generate test mnemonics and DIDs. While the application does require the user's mnemonic of their DID to generate the keys necessary for message encryption, decryption, and signing, remember that this mnemonic should be kept confidential and is stored securely in the browser, not kept on the backend server.
 
+To have a look and feel of it we are using the centralized database to store messages, we had plans to intregated with decentralized database solutions but due to time contrains we couldn't do it.
+
 ## Setup
 
 ## Prerequisites
@@ -102,7 +104,7 @@ Once the both parties are loggedIn and webRTC peers are connected you can do thi
 
 ## This is the implementation that we tried to do using DIDComm spec
 
-[implementation](https://github.com/Mr-Biskit/didComm-anonCrypt)
+[DIDComm Implementation](https://github.com/Mr-Biskit/didComm-anonCrypt)
 
 ## Encryption and Decryption
 
